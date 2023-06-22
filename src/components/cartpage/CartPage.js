@@ -1,64 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Context from '../Context/Context';
 
 export const CartPage = () => {
-  const [cart, setCart] = useState([]);
+  
+  const { cartItems } = useContext(Context);
   const [totalAmount, setTotalAmount] = useState(0);
 
   const ProductPricesSum = () => {
-    const sum = cart.reduce((total, product) => {
+
+    const sum = cartItems.reduce((total, product) => {
       const price = parseInt(product.original_price);
       return total + price;
     }, 0);
     return sum;
   };
 
-  const loadCart = async () => {
-    try {
-      const cartData = await AsyncStorage.getItem('cart');
-      if(cartData !== null) {
-        setCart(JSON.parse(cartData));
-        const total = ProductPricesSum();
-        setTotalAmount(total);
-      }
-    } catch (error) {
-      alert('Error', error);
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
-  }, []);
-
   useEffect(() => {
     const total = ProductPricesSum();
     setTotalAmount(total);
-  }, [cart]);
+  }, [cartItems]);
 
   return (
-    <>
-    <ScrollView contentContainerStyle={styles.container}>
-      {cart.map((product, index) => (
+    <><ScrollView contentContainerStyle={styles.container}>
+      {cartItems.map((product, index) => (
         <View key={index} style={styles.card}>
-          <Image src={product?.thumb_img?.files?.file} style={styles.image} />
-          <View style={styles.details}>
-            <Text style={styles.price}>{product?.original_price} ლ</Text>
-            <Text style={styles.name}>{product?.name}</Text>
-          </View>
+          <Image src={product?.thumb_img.files.file} style={styles.image} />
+          <Text style={styles.price}>{product?.original_price} ლ</Text>
+          <Text style={styles.name}>{product?.name}</Text>
         </View>
       ))}
     </ScrollView>
-    <TouchableOpacity style={styles.amount}><Text>Total: {totalAmount} ლ</Text></TouchableOpacity>
-    </>
+    <TouchableOpacity style={styles.button}><Text style={styles.totalprice}>Total: {totalAmount} ლ</Text></TouchableOpacity></>
   );
 };
 
 const styles = StyleSheet.create({
-  amount:{
-    alignItems:"center"
-  },
-
   container: {
     justifyContent: 'center',
     flexDirection: 'row',
@@ -80,12 +57,6 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 
-  details:{
-    width:"100%",
-    borderRadius:10,
-    marginTop:10,
-  },
-
   price: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -96,5 +67,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginLeft: 10,
     marginBottom:10
+  },
+
+  button:{
+    alignItems: "center",
+    backgroundColor: "#0d6efd",
+    width: "90%",
+    marginHorizontal: "5%",
+    paddingVertical: 5,
+    borderRadius: 5,
+    marginBottom: 1
+  },
+
+  totalprice:{
+    color:"white"
   }
 });
